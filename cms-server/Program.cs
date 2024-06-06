@@ -1,21 +1,23 @@
 
+using cms_server.Data;
 using cms_server.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
-using AppDbContext = cms_server.Models.AppDbContext;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
 
+// SQL Server connection
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("LocalConnection")));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 // Add Swagger services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS services for consuming API from different origins
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -25,8 +27,6 @@ builder.Services.AddCors(options =>
                .AllowAnyHeader();
     });
 });
-// Register Cmsv1Context with dependency injection
-
 
 var app = builder.Build();
 

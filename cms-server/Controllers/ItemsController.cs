@@ -1,4 +1,5 @@
-﻿using cms_server.Models;
+﻿using cms_server.Data;
+using cms_server.Models;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -9,9 +10,9 @@ namespace cms_server.Controllers
     [ApiController]
     public class ItemsController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly ApplicationDbContext _context;
 
-        public ItemsController(AppDbContext context)
+        public ItemsController(ApplicationDbContext context)
         {
             _context = context;
         }
