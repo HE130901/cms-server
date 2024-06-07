@@ -16,23 +16,27 @@ namespace cms_server.Data
         public DbSet<Section> Sections { get; set; }
         public DbSet<Niche> Niches { get; set; }
         public DbSet<Item> Items { get; set; }
+        public DbSet<Booking> Bookings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
+            // Seed data for Items
             var items = new List<Item>
             {
                 new Item { Id = 2, Name = "Item 2" },
                 new Item { Id = 3, Name = "Item 3" }
             };
 
+            // Seed data for Buildings
             var buildings = new List<Building>
             {
                 new Building { Id = 1, Name = "Tháp A" },
                 new Building { Id = 2, Name = "Tháp B" }
             };
 
+            // Seed data for Floors, Sections, and Niches
             var floors = new List<Floor>();
             var sections = new List<Section>();
             var niches = new List<Niche>();
@@ -41,7 +45,7 @@ namespace cms_server.Data
 
             foreach (var building in buildings)
             {
-                for (int f = 1; f <= 7; f++)
+                for (int f = 1; f <= 2; f++)
                 {
                     floors.Add(new Floor { Id = floorId, Name = $"Floor {f}", BuildingId = building.Id });
 
@@ -67,6 +71,7 @@ namespace cms_server.Data
                 }
             }
 
+            // Applying the seed data
             modelBuilder.Entity<Building>().HasData(buildings);
             modelBuilder.Entity<Floor>().HasData(floors);
             modelBuilder.Entity<Section>().HasData(sections);
