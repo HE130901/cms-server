@@ -1,46 +1,44 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using cms_server.Data;
+using cms_server.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace cms_server.Controllers
 {
-    [ApiController]
     [Route("api/[controller]")]
+    [ApiController]
     public class BuildingsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CmsbdContext _context;
 
-        public BuildingsController(ApplicationDbContext context)
+        public BuildingsController(CmsbdContext context)
         {
             _context = context;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetBuildings()
+        public async Task<ActionResult<IEnumerable<Building>>> GetBuildings()
         {
-            var buildings = await _context.Buildings.ToListAsync();
-            return Ok(buildings);
+            return await _context.Buildings.ToListAsync();
         }
 
         [HttpGet("{buildingId}/floors")]
-        public async Task<IActionResult> GetFloors(int buildingId)
+        public async Task<ActionResult<IEnumerable<Floor>>> GetFloors(int buildingId)
         {
-            var floors = await _context.Floors.Where(f => f.BuildingId == buildingId).ToListAsync();
-            return Ok(floors);
+            return await _context.Floors.Where(f => f.BuildingId == buildingId).ToListAsync();
         }
 
-        [HttpGet("{buildingId}/floors/{floorId}/sections")]
-        public async Task<IActionResult> GetSections(int buildingId, int floorId)
+        [HttpGet("{buildingId}/floors/{floorId}/areas")]
+        public async Task<ActionResult<IEnumerable<Area>>> GetAreas(int buildingId, int floorId)
         {
-            var sections = await _context.Sections.Where(s => s.FloorId == floorId).ToListAsync();
-            return Ok(sections);
+            return await _context.Areas.Where(a => a.FloorId == floorId && a.Floor.BuildingId == buildingId).ToListAsync();
         }
 
-        [HttpGet("{buildingId}/floors/{floorId}/sections/{sectionId}/niches")]
-        public async Task<IActionResult> GetNiches(int buildingId, int floorId, int sectionId)
+        [HttpGet("{buildingId}/floors/{floorId}/areas/{areaId}/niches")]
+        public async Task<ActionResult<IEnumerable<Niche>>> GetNiches(int buildingId, int floorId, int areaId)
         {
-            var niches = await _context.Niches.Where(n => n.SectionId == sectionId).ToListAsync();
-            return Ok(niches);
+            return await _context.Niches.Where(n => n.AreaId == areaId && n.Area.FloorId == floorId && n.Area.Floor.BuildingId == buildingId).ToListAsync();
         }
     }
 }

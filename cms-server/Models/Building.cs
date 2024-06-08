@@ -1,9 +1,15 @@
-﻿namespace cms_server.Models
+﻿using System;
+using System.Collections.Generic;
+
+namespace cms_server.Models;
+
+public partial class Building
 {
-    public class Building
-    {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public List<Floor> Floors { get; set; }
-    }
+    public int BuildingId { get; set; }
+
+    public string BuildingName { get; set; } = null!;
+
+    public string? BuildingDescription { get; set; }
+
+    public virtual ICollection<Floor> Floors { get; set; } = new List<Floor>();
 }

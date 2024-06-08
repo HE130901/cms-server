@@ -3,27 +3,29 @@ using System.Collections.Generic;
 
 namespace cms_server.Models;
 
-public partial class Niche
+public partial class Customer
 {
-    public int NicheId { get; set; }
+    public int CustomerId { get; set; }
 
-    public int AreaId { get; set; }
+    public string FullName { get; set; } = null!;
 
-    public int NicheNumber { get; set; }
+    public string Email { get; set; } = null!;
 
-    public string Status { get; set; } = null!;
+    public string Phone { get; set; } = null!;
 
-    public string Qrcode { get; set; } = null!;
+    public string? Address { get; set; }
 
-    public string? NicheDescription { get; set; }
+    public string PasswordHash { get; set; } = null!;
 
-    public virtual Area Area { get; set; } = null!;
+    public string CitizenId { get; set; } = null!;
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 
     public virtual ICollection<Deceased> Deceaseds { get; set; } = new List<Deceased>();
 
     public virtual ICollection<NicheReservation> NicheReservations { get; set; } = new List<NicheReservation>();
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
 
