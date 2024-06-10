@@ -9,7 +9,7 @@ public partial class NicheReservation
 
     public int CustomerId { get; set; }
 
-    public int DeceasedId { get; set; }
+    public int RecipientId { get; set; }
 
     public int NicheId { get; set; }
 
@@ -25,7 +25,7 @@ public partial class NicheReservation
 
     public virtual Customer Customer { get; set; } = null!;
 
-    public virtual Deceased Deceased { get; set; } = null!;
-
     public virtual Niche Niche { get; set; } = null!;
+
+    public virtual Recipient Recipient { get; set; } = null!;
 }

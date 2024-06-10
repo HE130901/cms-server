@@ -21,15 +21,9 @@ public partial class ServiceOrder
 
     public int StaffId { get; set; }
 
-    public bool NotificationToStaffSent { get; set; }
-
-    public bool NotificationToCustomerSent { get; set; }
-
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Niche Niche { get; set; } = null!;
-
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual Service Service { get; set; } = null!;
 

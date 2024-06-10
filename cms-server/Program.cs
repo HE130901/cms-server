@@ -1,23 +1,23 @@
 using System.Text;
+using cms_server.Models;
+using cms_server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using cms_server.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 
-// SQL Server connection
-builder.Services.AddDbContext<CmsbdContext>(options =>
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CmsbdDatabase")));
 
-// Add Swagger services
+builder.Services.AddScoped<IRecipientService, RecipientService>();
+builder.Services.AddScoped<IReservationService, ReservationService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Add CORS services for consuming API from different origins
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", builder =>
@@ -28,7 +28,6 @@ builder.Services.AddCors(options =>
     });
 });
 
-// Add JWT Authentication services
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {

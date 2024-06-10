@@ -11,19 +11,23 @@ public partial class Contract
 
     public int NicheId { get; set; }
 
+    public int RecipientId { get; set; }
+
+    public int StaffId { get; set; }
+
     public DateOnly StartDate { get; set; }
 
     public DateOnly EndDate { get; set; }
 
-    public decimal TotalAmount { get; set; }
+    public string Status { get; set; } = null!;
 
-    public string PaymentStatus { get; set; } = null!;
-
-    public bool NotificationSent { get; set; }
+    public decimal Price { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Niche Niche { get; set; } = null!;
 
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+    public virtual Recipient Recipient { get; set; } = null!;
+
+    public virtual Staff Staff { get; set; } = null!;
 }

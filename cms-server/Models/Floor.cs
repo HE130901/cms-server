@@ -9,9 +9,9 @@ public partial class Floor
 
     public int BuildingId { get; set; }
 
-    public string? FloorDescription { get; set; }
-
     public string? FloorName { get; set; }
+
+    public string? FloorDescription { get; set; }
 
     public decimal NichePrice { get; set; }
 

@@ -9,7 +9,7 @@ public partial class Area
 
     public int FloorId { get; set; }
 
-    public int AreaNumber { get; set; }
+    public string? AreaName { get; set; }
 
     public string? AreaDescription { get; set; }
 

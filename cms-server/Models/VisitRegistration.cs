@@ -17,8 +17,6 @@ public partial class VisitRegistration
 
     public int? ApprovedBy { get; set; }
 
-    public DateOnly? ApprovalDate { get; set; }
-
     public string? ApprovalStatus { get; set; }
 
     public virtual Staff? ApprovedByNavigation { get; set; }
@@ -26,6 +24,4 @@ public partial class VisitRegistration
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Niche Niche { get; set; } = null!;
-
-    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }
