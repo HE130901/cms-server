@@ -25,15 +25,31 @@ namespace CMSApi.Controllers
         public IActionResult Login(LoginDto loginDto)
         {
             var customer = _context.Customers.SingleOrDefault(c => c.Email == loginDto.Email);
-            if (customer == null || !BCrypt.Net.BCrypt.Verify(loginDto.Password, customer.PasswordHash))
-                return Unauthorized("Invalid credentials.");
-
-            var token = GenerateJwtToken(customer);
-            return Ok(new
+            if (customer != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, customer.PasswordHash))
             {
-                Token = token
-            });
+                var token = GenerateJwtToken(customer, "Customer");
+                return Ok(new
+                {
+                    Token = token,
+                    Role = "Customer"
+                });
+            }
+
+            var staff = _context.Staff.SingleOrDefault(s => s.Email == loginDto.Email);
+            if (staff != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, staff.PasswordHash))
+            {
+                var token = GenerateJwtToken(new Customer { CustomerId = staff.StaffId }, staff.Role);
+                return Ok(new
+                {
+                    Token = token,
+                    Role = staff.Role
+                });
+            }
+
+            return Unauthorized("Invalid credentials.");
         }
+
+
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
         {
@@ -106,17 +122,18 @@ namespace CMSApi.Controllers
         private string GetCustomerClaim(string claimType)
         {
             var claim = HttpContext.User.Identity as ClaimsIdentity;
-            var claimValue = claim.FindFirst(claimType)?.Value;
+            var claimValue = claim?.FindFirst(claimType)?.Value;
             return claimValue;
         }
 
-        private string GenerateJwtToken(Customer customer)
+        private string GenerateJwtToken(Customer customer, string role)
         {
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, customer.CustomerId.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, customer.CustomerId.ToString())
+                new Claim(ClaimTypes.NameIdentifier, customer.CustomerId.ToString()),
+                new Claim(ClaimTypes.Role, role)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));

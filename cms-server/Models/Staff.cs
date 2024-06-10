@@ -15,6 +15,8 @@ public partial class Staff
 
     public string Role { get; set; } = null!;
 
+    public string PasswordHash { get; set; } = null!;
+
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 
     public virtual ICollection<NicheReservation> NicheReservations { get; set; } = new List<NicheReservation>();

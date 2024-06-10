@@ -7,13 +7,14 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Add services to the container.
 builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("CmsbdDatabase")));
 
-builder.Services.AddScoped<IRecipientService, RecipientService>();
-builder.Services.AddScoped<IReservationService, ReservationService>();
+builder.Services.AddScoped<IRecipientService, RecipientService>(); // Register RecipientService
+builder.Services.AddScoped<IReservationService, ReservationService>(); // Register ReservationService
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
