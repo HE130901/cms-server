@@ -34,6 +34,27 @@ namespace CMSApi.Controllers
                 Token = token
             });
         }
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterDto registerDto)
+        {
+            if (_context.Customers.Any(c => c.Email == registerDto.Email))
+                return BadRequest("Email already in use.");
+
+            var customer = new Customer
+            {
+                FullName = registerDto.FullName,
+                Email = registerDto.Email,
+                Phone = registerDto.Phone,
+                Address = registerDto.Address,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
+                CitizenId = registerDto.CitizenId
+            };
+
+            _context.Customers.Add(customer);
+            await _context.SaveChangesAsync();
+
+            return Ok("Registration successful.");
+        }
 
         [HttpGet("get-cusId")]
         public IActionResult GetCustomerId()
