@@ -13,15 +13,17 @@ public partial class VisitRegistration
 
     public DateOnly VisitDate { get; set; }
 
-    public string Status { get; set; } = null!;
+    public string? Status { get; set; }
 
     public int? ApprovedBy { get; set; }
 
-    public string? ApprovalStatus { get; set; }
+    public DateOnly? ApprovalDate { get; set; }
 
     public virtual Staff? ApprovedByNavigation { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Niche Niche { get; set; } = null!;
+
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 }

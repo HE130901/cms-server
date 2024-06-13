@@ -1,10 +1,11 @@
 ﻿using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using cms_server.DTOs;
 using cms_server.Models;
+using System.Text;
 
 namespace CMSApi.Controllers
 {
@@ -12,10 +13,10 @@ namespace CMSApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CmsContext _context;
         private readonly IConfiguration _configuration;
 
-        public AuthController(ApplicationDbContext context, IConfiguration configuration)
+        public AuthController(CmsContext context, IConfiguration configuration)
         {
             _context = context;
             _configuration = configuration;
@@ -27,18 +28,18 @@ namespace CMSApi.Controllers
             var customer = _context.Customers.SingleOrDefault(c => c.Email == loginDto.Email);
             if (customer != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, customer.PasswordHash))
             {
-                var token = GenerateJwtToken(customer, "Customer");
+                var token = GenerateJwtToken(customer.CustomerId.ToString(), customer.AccountStatus);
                 return Ok(new
                 {
                     Token = token,
-                    Role = "Customer"
+                    Role = customer.AccountStatus
                 });
             }
 
             var staff = _context.Staff.SingleOrDefault(s => s.Email == loginDto.Email);
             if (staff != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, staff.PasswordHash))
             {
-                var token = GenerateJwtToken(new Customer { CustomerId = staff.StaffId }, staff.Role);
+                var token = GenerateJwtToken(staff.StaffId.ToString(), staff.Role);
                 return Ok(new
                 {
                     Token = token,
@@ -48,7 +49,6 @@ namespace CMSApi.Controllers
 
             return Unauthorized("Invalid credentials.");
         }
-
 
         [HttpPost("register")]
         public async Task<IActionResult> Register(RegisterDto registerDto)
@@ -63,7 +63,8 @@ namespace CMSApi.Controllers
                 Phone = registerDto.Phone,
                 Address = registerDto.Address,
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword(registerDto.Password),
-                CitizenId = registerDto.CitizenId
+                CitizenId = registerDto.CitizenId,
+                AccountStatus = "Guest"
             };
 
             _context.Customers.Add(customer);
@@ -71,68 +72,67 @@ namespace CMSApi.Controllers
 
             return Ok("Registration successful.");
         }
-
-        [HttpGet("get-cusId")]
-        public IActionResult GetCustomerId()
+        [HttpGet("get-current-user")]
+        [Authorize]
+        public IActionResult GetCurrentUser()
         {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            return Ok(customerId);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var role = User.FindFirst(ClaimTypes.Role)?.Value;
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(role))
+            {
+                return Unauthorized("Invalid token.");
+            }
+
+            if (role == "Customer" || role == "Guest")
+            {
+                if (int.TryParse(userId, out int parsedUserId))
+                {
+                    var customer = _context.Customers.SingleOrDefault(c => c.CustomerId == parsedUserId);
+                    if (customer == null)
+                    {
+                        return NotFound("Customer not found.");
+                    }
+
+                    return Ok(new
+                    {
+                        customerId = customer.CustomerId,
+                        fullName = customer.FullName,
+                        citizenId = customer.CitizenId,
+                        role = customer.AccountStatus
+                    });
+                }
+            }
+            else if (role == "Staff" || role == "Manager")
+            {
+                if (int.TryParse(userId, out int parsedUserId))
+                {
+                    var staff = _context.Staff.SingleOrDefault(s => s.StaffId == parsedUserId);
+                    if (staff == null)
+                    {
+                        return NotFound("Staff not found.");
+                    }
+
+                    return Ok(new
+                    {
+                        staffId = staff.StaffId,
+                        fullName = staff.FullName,
+                        role = staff.Role
+                    });
+                }
+            }
+
+            return Unauthorized("Invalid user role.");
         }
 
-        [HttpGet("get-cusFullname")]
-        public IActionResult GetCustomerFullname()
-        {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            var customer = _context.Customers.Find(int.Parse(customerId));
-            return Ok(customer?.FullName);
-        }
 
-        [HttpGet("get-cusEmail")]
-        public IActionResult GetCustomerEmail()
-        {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            var customer = _context.Customers.Find(int.Parse(customerId));
-            return Ok(customer?.Email);
-        }
-
-        [HttpGet("get-cusPhone")]
-        public IActionResult GetCustomerPhone()
-        {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            var customer = _context.Customers.Find(int.Parse(customerId));
-            return Ok(customer?.Phone);
-        }
-
-        [HttpGet("get-cusAddress")]
-        public IActionResult GetCustomerAddress()
-        {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            var customer = _context.Customers.Find(int.Parse(customerId));
-            return Ok(customer?.Address);
-        }
-
-        [HttpGet("get-cusCitizenId")]
-        public IActionResult GetCustomerCitizenId()
-        {
-            var customerId = GetCustomerClaim(ClaimTypes.NameIdentifier);
-            var customer = _context.Customers.Find(int.Parse(customerId));
-            return Ok(customer?.CitizenId);
-        }
-
-        private string GetCustomerClaim(string claimType)
-        {
-            var claim = HttpContext.User.Identity as ClaimsIdentity;
-            var claimValue = claim?.FindFirst(claimType)?.Value;
-            return claimValue;
-        }
-
-        private string GenerateJwtToken(Customer customer, string role)
+        private string GenerateJwtToken(string userId, string role)
         {
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, customer.CustomerId.ToString()),
+                new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier, customer.CustomerId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, userId),
                 new Claim(ClaimTypes.Role, role)
             };
 
@@ -146,6 +146,7 @@ namespace CMSApi.Controllers
                 expires: DateTime.Now.AddDays(1),
                 signingCredentials: creds
             );
+
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }

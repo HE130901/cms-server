@@ -9,23 +9,19 @@ public partial class NicheReservation
 
     public int CustomerId { get; set; }
 
-    public int RecipientId { get; set; }
-
     public int NicheId { get; set; }
 
-    public DateOnly ReservationDate { get; set; }
+    public DateOnly CreatedDate { get; set; }
 
-    public string Status { get; set; } = null!;
+    public DateOnly? ConfirmationDate { get; set; }
 
-    public int ConfirmedBy { get; set; }
+    public string? Status { get; set; }
 
-    public DateOnly ConfirmationDate { get; set; }
+    public int? ConfirmedBy { get; set; }
 
-    public virtual Staff ConfirmedByNavigation { get; set; } = null!;
+    public virtual Staff? ConfirmedByNavigation { get; set; }
 
     public virtual Customer Customer { get; set; } = null!;
 
     public virtual Niche Niche { get; set; } = null!;
-
-    public virtual Recipient Recipient { get; set; } = null!;
 }

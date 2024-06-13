@@ -9,9 +9,11 @@ public partial class Area
 
     public int FloorId { get; set; }
 
-    public string? AreaName { get; set; }
+    public string AreaName { get; set; } = null!;
 
     public string? AreaDescription { get; set; }
+
+    public byte[]? AreaPicture { get; set; }
 
     public virtual Floor Floor { get; set; } = null!;
 

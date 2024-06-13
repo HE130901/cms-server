@@ -7,9 +7,9 @@ public partial class Report
 {
     public int ReportId { get; set; }
 
-    public string ReportType { get; set; } = null!;
+    public string? ReportType { get; set; }
 
-    public DateOnly GeneratedDate { get; set; }
+    public DateOnly? GeneratedDate { get; set; }
 
     public string? Content { get; set; }
 }

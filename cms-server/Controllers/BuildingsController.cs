@@ -10,9 +10,9 @@ namespace cms_server.Controllers
     [ApiController]
     public class BuildingsController : ControllerBase
     {
-        private readonly ApplicationDbContext _context;
+        private readonly CmsContext _context;
 
-        public BuildingsController(ApplicationDbContext context)
+        public BuildingsController(CmsContext context)
         {
             _context = context;
         }

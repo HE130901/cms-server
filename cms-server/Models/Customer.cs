@@ -11,19 +11,25 @@ public partial class Customer
 
     public string Email { get; set; } = null!;
 
-    public string Phone { get; set; } = null!;
+    public string? Phone { get; set; }
 
     public string? Address { get; set; }
 
     public string PasswordHash { get; set; } = null!;
 
-    public string CitizenId { get; set; } = null!;
+    public string? CitizenId { get; set; }
+
+    public string? AccountStatus { get; set; }
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 
+    public virtual ICollection<Deceased> Deceaseds { get; set; } = new List<Deceased>();
+
+    public virtual ICollection<NicheHistory> NicheHistories { get; set; } = new List<NicheHistory>();
+
     public virtual ICollection<NicheReservation> NicheReservations { get; set; } = new List<NicheReservation>();
 
-    public virtual ICollection<Recipient> Recipients { get; set; } = new List<Recipient>();
+    public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
 
     public virtual ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
 

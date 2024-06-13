@@ -11,7 +11,5 @@ public partial class Service
 
     public string? Description { get; set; }
 
-    public decimal Price { get; set; }
-
-    public virtual ICollection<ServiceOrder> ServiceOrders { get; set; } = new List<ServiceOrder>();
+    public decimal? Price { get; set; }
 }

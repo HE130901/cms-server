@@ -1,6 +1,5 @@
 using System.Text;
 using cms_server.Models;
-using cms_server.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,11 +9,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllers();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("CmsbdDatabase")));
-
-builder.Services.AddScoped<IRecipientService, RecipientService>(); // Register RecipientService
-builder.Services.AddScoped<IReservationService, ReservationService>(); // Register ReservationService
+builder.Services.AddDbContext<CmsContext>(options =>
+  options.UseSqlServer(builder.Configuration.GetConnectionString("CmsbdDatabase")));
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
@@ -44,7 +40,13 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("RequireManagerRole", policy => policy.RequireRole("Manager"));
+    options.AddPolicy("RequireStaffRole", policy => policy.RequireRole("Staff", "Manager"));
+    options.AddPolicy("RequireCustomerRole", policy => policy.RequireRole("Customer", "Manager"));
+    options.AddPolicy("RequireGuestRole", policy => policy.RequireRole("Guest", "Customer", "Staff", "Manager"));
+});
 
 var app = builder.Build();
 
