@@ -15,7 +15,7 @@ public partial class Floor
 
     public decimal? NichePrice { get; set; }
 
-    public byte[]? FloorPicture { get; set; }
+    public string? FloorPicture { get; set; }
 
     public virtual ICollection<Area> Areas { get; set; } = new List<Area>();
 

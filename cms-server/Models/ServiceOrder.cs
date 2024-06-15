@@ -17,7 +17,7 @@ public partial class ServiceOrder
 
     public string? Status { get; set; }
 
-    public byte[]? CompletionImage { get; set; }
+    public string? CompletionImage { get; set; }
 
     public int? StaffId { get; set; }
 

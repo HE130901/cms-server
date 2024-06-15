@@ -13,7 +13,7 @@ public partial class Area
 
     public string? AreaDescription { get; set; }
 
-    public byte[]? AreaPicture { get; set; }
+    public string? AreaPicture { get; set; }
 
     public virtual Floor Floor { get; set; } = null!;
 

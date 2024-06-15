@@ -11,7 +11,7 @@ public partial class Building
 
     public string? BuildingDescription { get; set; }
 
-    public byte[]? BuildingPicture { get; set; }
+    public string? BuildingPicture { get; set; }
 
     public virtual ICollection<Floor> Floors { get; set; } = new List<Floor>();
 }
