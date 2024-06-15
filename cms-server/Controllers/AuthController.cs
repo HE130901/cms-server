@@ -28,7 +28,7 @@ namespace CMSApi.Controllers
             var customer = _context.Customers.SingleOrDefault(c => c.Email == loginDto.Email);
             if (customer != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, customer.PasswordHash))
             {
-                var token = GenerateJwtToken(customer.CustomerId.ToString(), customer.AccountStatus);
+                var token = GenerateJwtToken(customer.CustomerId.ToString(), customer.AccountStatus, customer.Phone, customer.Address);
                 return Ok(new
                 {
                     Token = token,
@@ -39,7 +39,7 @@ namespace CMSApi.Controllers
             var staff = _context.Staff.SingleOrDefault(s => s.Email == loginDto.Email);
             if (staff != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, staff.PasswordHash))
             {
-                var token = GenerateJwtToken(staff.StaffId.ToString(), staff.Role);
+                var token = GenerateJwtToken(staff.StaffId.ToString(), staff.Role, staff.Phone, staff.Email);
                 return Ok(new
                 {
                     Token = token,
@@ -72,6 +72,7 @@ namespace CMSApi.Controllers
 
             return Ok("Registration successful.");
         }
+
         [HttpGet("get-current-user")]
         [Authorize]
         public IActionResult GetCurrentUser()
@@ -99,7 +100,10 @@ namespace CMSApi.Controllers
                         customerId = customer.CustomerId,
                         fullName = customer.FullName,
                         citizenId = customer.CitizenId,
-                        role = customer.AccountStatus
+                        role = customer.AccountStatus,
+                        email = customer.Email,
+                        phone = customer.Phone,
+                        address = customer.Address
                     });
                 }
             }
@@ -117,7 +121,9 @@ namespace CMSApi.Controllers
                     {
                         staffId = staff.StaffId,
                         fullName = staff.FullName,
-                        role = staff.Role
+                        role = staff.Role,
+                        email = staff.Email,
+                        phone = staff.Phone
                     });
                 }
             }
@@ -125,15 +131,16 @@ namespace CMSApi.Controllers
             return Unauthorized("Invalid user role.");
         }
 
-
-        private string GenerateJwtToken(string userId, string role)
+        private string GenerateJwtToken(string userId, string role, string phone, string address)
         {
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(ClaimTypes.NameIdentifier, userId),
-                new Claim(ClaimTypes.Role, role)
+                new Claim(ClaimTypes.Role, role),
+                new Claim("Phone", phone),
+                new Claim("Address", address)
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
