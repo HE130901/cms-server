@@ -129,6 +129,36 @@ namespace cms_server.Controllers
         {
             return _context.VisitRegistrations.Any(e => e.VisitId == id);
         }
+
+        [HttpPut("{id}/VisitDate")]
+        public async Task<IActionResult> UpdateConfirmDate(int id, [FromBody] DateOnly VisitDate)
+        {
+            var reservation = await _context.VisitRegistrations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound(new { message = "Reservation not found" });
+            }
+
+            DateOnly today = DateOnly.FromDateTime(DateTime.Now);
+            if (VisitDate <= today)
+            {
+                return BadRequest(new { message = "Visit date must be after today!" });
+            }
+
+            reservation.VisitDate = VisitDate;
+            _context.Entry(reservation).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+
+            }
+
+            return NoContent();
+        }
     }
 
     public class VisitRegistrationDto

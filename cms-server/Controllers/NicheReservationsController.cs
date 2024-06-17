@@ -205,14 +205,7 @@ namespace cms_server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                /*if (!ReservationExists(id))
-                {
-                    return NotFound(new { message = "Reservation not found" });
-                }
-                else
-                {
-                    throw;
-                }*/
+                
             }
 
             return NoContent();
