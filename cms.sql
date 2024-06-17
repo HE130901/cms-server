@@ -189,3 +189,10 @@ CREATE TABLE NicheHistory (
 -- Sửa đổi bảng Customer để thêm cột AccountStatus
 ALTER TABLE Customer
 ADD AccountStatus NVARCHAR(50) DEFAULT 'Guest';
+
+
+ALTER TABLE NicheReservation
+ADD SignAddress NVARCHAR(MAX),
+    PhoneNumber NVARCHAR(50),
+    Note NVARCHAR(MAX);
+
