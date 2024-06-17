@@ -181,12 +181,48 @@ namespace cms_server.Controllers
         {
             return _context.NicheReservations.Any(e => e.ReservationId == id);
         }
-    }
 
-    public class CreateNicheReservationDto
-    {
-        public int CustomerId { get; set; }
-        public int NicheId { get; set; }
-        public DateOnly? ConfirmationDate { get; set; }
+        [HttpPut("{id}/confirmdate")]
+        public async Task<IActionResult> UpdateConfirmDate(int id, [FromBody] DateOnly confirmDate)
+        {
+            var reservation = await _context.NicheReservations.FindAsync(id);
+            if (reservation == null)
+            {
+                return NotFound(new { message = "Reservation not found" });
+            }
+
+            if (confirmDate < reservation.CreatedDate)
+            {
+                return BadRequest(new { message = "ConfirmDate must be after CreatedDate" });
+            }
+
+            reservation.ConfirmationDate = confirmDate;
+            _context.Entry(reservation).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                /*if (!ReservationExists(id))
+                {
+                    return NotFound(new { message = "Reservation not found" });
+                }
+                else
+                {
+                    throw;
+                }*/
+            }
+
+            return NoContent();
+        }
+
+        public class CreateNicheReservationDto
+        {
+            public int CustomerId { get; set; }
+            public int NicheId { get; set; }
+            public DateOnly? ConfirmationDate { get; set; }
+        }
     }
 }
