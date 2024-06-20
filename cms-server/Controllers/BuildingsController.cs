@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using cms_server.Models;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace cms_server.Controllers
@@ -20,7 +21,14 @@ namespace cms_server.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Building>>> GetBuildings()
         {
-            return await _context.Buildings.ToListAsync();
+            // Including BuildingPicture in the response
+            return await _context.Buildings.Select(b => new Building
+            {
+                BuildingId = b.BuildingId,
+                BuildingName = b.BuildingName,
+                BuildingDescription = b.BuildingDescription,
+                BuildingPicture = b.BuildingPicture
+            }).ToListAsync();
         }
 
         [HttpGet("{buildingId}/floors")]

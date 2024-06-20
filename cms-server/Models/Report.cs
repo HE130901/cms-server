@@ -9,7 +9,7 @@ public partial class Report
 
     public string? ReportType { get; set; }
 
-    public DateOnly? GeneratedDate { get; set; }
+    public DateTime? GeneratedDate { get; set; }
 
     public string? Content { get; set; }
 }

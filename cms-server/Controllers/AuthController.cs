@@ -6,6 +6,11 @@ using Microsoft.IdentityModel.Tokens;
 using cms_server.DTOs;
 using cms_server.Models;
 using System.Text;
+using System.Security.Cryptography;
+using MailKit.Net.Smtp;
+using MimeKit;
+using MimeKit.Text;
+using Microsoft.Extensions.Configuration;
 
 namespace CMSApi.Controllers
 {
@@ -33,17 +38,6 @@ namespace CMSApi.Controllers
                 {
                     Token = token,
                     Role = customer.AccountStatus
-                });
-            }
-
-            var staff = _context.Staff.SingleOrDefault(s => s.Email == loginDto.Email);
-            if (staff != null && BCrypt.Net.BCrypt.Verify(loginDto.Password, staff.PasswordHash))
-            {
-                var token = GenerateJwtToken(staff.StaffId.ToString(), staff.Role, staff.Phone, staff.Email);
-                return Ok(new
-                {
-                    Token = token,
-                    Role = staff.Role
                 });
             }
 
@@ -107,28 +101,45 @@ namespace CMSApi.Controllers
                     });
                 }
             }
-            else if (role == "Staff" || role == "Manager")
-            {
-                if (int.TryParse(userId, out int parsedUserId))
-                {
-                    var staff = _context.Staff.SingleOrDefault(s => s.StaffId == parsedUserId);
-                    if (staff == null)
-                    {
-                        return NotFound("Staff not found.");
-                    }
-
-                    return Ok(new
-                    {
-                        staffId = staff.StaffId,
-                        fullName = staff.FullName,
-                        role = staff.Role,
-                        email = staff.Email,
-                        phone = staff.Phone
-                    });
-                }
-            }
 
             return Unauthorized("Invalid user role.");
+        }
+
+        [HttpPost("request-password-reset")]
+        public IActionResult RequestPasswordReset(RequestPasswordResetDto requestDto)
+        {
+            var customer = _context.Customers.SingleOrDefault(c => c.Email == requestDto.Email);
+            if (customer == null)
+            {
+                return NotFound("Email not found.");
+            }
+
+            var newPassword = GenerateRandomPassword();
+            customer.PasswordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+            _context.SaveChanges();
+
+            var message = $"Your new password is: {newPassword}";
+
+            SendEmail(customer.Email, "Your New Password", message);
+
+            return Ok("A new password has been sent to your email.");
+        }
+
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(ResetPasswordDto resetDto)
+        {
+            var customer = _context.Customers.SingleOrDefault(c => c.PasswordResetToken == resetDto.Token);
+            if (customer == null || customer.PasswordResetTokenExpiration < DateTime.UtcNow)
+            {
+                return BadRequest("Invalid or expired token.");
+            }
+
+            customer.PasswordHash = BCrypt.Net.BCrypt.HashPassword(resetDto.NewPassword);
+            customer.PasswordResetToken = null;
+            customer.PasswordResetTokenExpiration = null;
+            _context.SaveChanges();
+
+            return Ok("Password reset successful.");
         }
 
         private string GenerateJwtToken(string userId, string role, string phone, string address)
@@ -156,5 +167,51 @@ namespace CMSApi.Controllers
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        private string GenerateRandomPassword(int length = 12)
+        {
+            const string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+            var random = new Random();
+            return new string(Enumerable.Repeat(validChars, length)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        private void SendEmail(string recipientEmail, string subject, string message)
+        {
+            var emailMessage = new MimeMessage();
+            emailMessage.From.Add(new MailboxAddress(
+                _configuration["SmtpSettings:SenderName"],
+                _configuration["SmtpSettings:SenderEmail"]));
+            emailMessage.To.Add(new MailboxAddress(recipientEmail, recipientEmail));
+            emailMessage.Subject = subject;
+            emailMessage.Body = new TextPart(TextFormat.Html) { Text = message };
+
+            using (var client = new SmtpClient())
+            {
+                client.Connect(
+                    _configuration["SmtpSettings:Server"],
+                    int.Parse(_configuration["SmtpSettings:Port"]),
+                    MailKit.Security.SecureSocketOptions.StartTls);
+                client.Authenticate(
+                    _configuration["SmtpSettings:Username"],
+                    _configuration["SmtpSettings:Password"]);
+                client.Send(emailMessage);
+                client.Disconnect(true);
+            }
+        }
+    }
+}
+
+namespace cms_server.DTOs
+{
+    public class RequestPasswordResetDto
+    {
+        public string Email { get; set; }
+    }
+
+    public class ResetPasswordDto
+    {
+        public string Token { get; set; }
+        public string NewPassword { get; set; }
     }
 }

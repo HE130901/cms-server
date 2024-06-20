@@ -196,3 +196,40 @@ ADD SignAddress NVARCHAR(MAX),
     PhoneNumber NVARCHAR(50),
     Note NVARCHAR(MAX);
 
+-- Bảng ServiceOrder: Update OrderDate to include time
+ALTER TABLE ServiceOrder
+ALTER COLUMN OrderDate DATETIME;
+
+-- Bảng VisitRegistration: Update VisitDate and ApprovalDate to include time
+ALTER TABLE VisitRegistration
+ALTER COLUMN VisitDate DATETIME;
+
+ALTER TABLE VisitRegistration
+ALTER COLUMN ApprovalDate DATETIME;
+
+-- Bảng Report: Update GeneratedDate to include time
+ALTER TABLE Report
+ALTER COLUMN GeneratedDate DATETIME;
+
+-- Bảng NicheReservation: Update CreatedDate and ConfirmationDate to include time
+ALTER TABLE NicheReservation
+ALTER COLUMN CreatedDate DATETIME;
+
+ALTER TABLE NicheReservation
+ALTER COLUMN ConfirmationDate DATETIME;
+
+-- Bảng Notification: Update NotificationDate to include time
+ALTER TABLE Notification
+ALTER COLUMN NotificationDate DATETIME;
+
+ALTER TABLE NicheReservation
+ADD Note NVARCHAR(MAX);
+
+ALTER TABLE Customer
+ADD PasswordResetToken NVARCHAR(MAX);
+
+ALTER TABLE Customer
+ADD PasswordResetTokenExpiration DATETIME;
+
+
+

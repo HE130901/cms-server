@@ -11,13 +11,18 @@ public partial class NicheReservation
 
     public int NicheId { get; set; }
 
-    public DateOnly CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 
-    public DateOnly? ConfirmationDate { get; set; }
+    public DateTime? ConfirmationDate { get; set; }
 
     public string? Status { get; set; }
 
     public int? ConfirmedBy { get; set; }
+
+    public string? SignAddress { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? Note { get; set; }
+
 
     public virtual Staff? ConfirmedByNavigation { get; set; }
 

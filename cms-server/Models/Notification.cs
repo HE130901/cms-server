@@ -17,7 +17,7 @@ public partial class Notification
 
     public int? VisitId { get; set; }
 
-    public DateOnly? NotificationDate { get; set; }
+    public DateTime? NotificationDate { get; set; }
 
     public string? Message { get; set; }
 

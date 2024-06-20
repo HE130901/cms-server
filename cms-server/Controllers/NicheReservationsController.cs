@@ -85,8 +85,11 @@ namespace cms_server.Controllers
                     {
                         CustomerId = createDto.CustomerId,
                         NicheId = createDto.NicheId,
-                        CreatedDate = DateOnly.FromDateTime(DateTime.Now),
+                        CreatedDate = DateTime.UtcNow,
                         ConfirmationDate = createDto.ConfirmationDate,
+                        SignAddress = createDto.SignAddress,
+                        PhoneNumber = createDto.PhoneNumber,
+                        Note = createDto.Note,
                         Status = "pending",
                         ConfirmedBy = null
                     };
@@ -187,6 +190,9 @@ namespace cms_server.Controllers
     {
         public int CustomerId { get; set; }
         public int NicheId { get; set; }
-        public DateOnly? ConfirmationDate { get; set; }
+        public DateTime? ConfirmationDate { get; set; }
+        public String SignAddress { get; set; }
+        public String PhoneNumber { get; set; }
+        public String Note { get; set; }
     }
 }

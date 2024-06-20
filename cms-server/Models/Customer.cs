@@ -20,6 +20,8 @@ public partial class Customer
     public string? CitizenId { get; set; }
 
     public string? AccountStatus { get; set; }
+    public string? PasswordResetToken { get; set; }
+    public DateTime? PasswordResetTokenExpiration { get; set; }
 
     public virtual ICollection<Contract> Contracts { get; set; } = new List<Contract>();
 

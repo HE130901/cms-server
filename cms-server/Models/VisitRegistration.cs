@@ -11,13 +11,15 @@ public partial class VisitRegistration
 
     public int NicheId { get; set; }
 
-    public DateOnly VisitDate { get; set; }
+    public DateTime VisitDate { get; set; }
 
     public string? Status { get; set; }
 
+    public string? Note { get; set; }
+
     public int? ApprovedBy { get; set; }
 
-    public DateOnly? ApprovalDate { get; set; }
+    public DateTime? ApprovalDate { get; set; }
 
     public virtual Staff? ApprovedByNavigation { get; set; }
 

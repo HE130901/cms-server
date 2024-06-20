@@ -98,6 +98,7 @@ namespace cms_server.Controllers
                 CustomerId = visitRegistrationDto.CustomerId,
                 NicheId = visitRegistrationDto.NicheId,
                 VisitDate = visitRegistrationDto.VisitDate,
+                Note = visitRegistrationDto.note,
                 Status = "Pending", // Set default status to pending
                 ApprovedBy = null, // Set ApprovedBy to null
                 ApprovalDate = null // Set ApprovalDate to null
@@ -135,6 +136,7 @@ namespace cms_server.Controllers
     {
         public int CustomerId { get; set; }
         public int NicheId { get; set; }
-        public DateOnly VisitDate { get; set; }
+        public DateTime VisitDate { get; set; }
+        public String note { get; set; }
     }
 }
