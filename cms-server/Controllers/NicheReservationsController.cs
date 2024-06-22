@@ -211,11 +211,60 @@ namespace cms_server.Controllers
             return NoContent();
         }
 
+        // PUT: api/nichereservations/{id}/status
+        [HttpPut("{id}/status")]
+        public async Task<IActionResult> UpdateNicheReservationStatus(int id, UpdateNicheReservationStautsDto updateStatusDto)
+        {
+            if (string.IsNullOrEmpty(updateStatusDto.newStatus))
+            {
+                return BadRequest(new { message = "Invalid status" });
+            }
+
+            var nicheReservation = await _context.NicheReservations.FindAsync(id);
+            if (nicheReservation == null)
+            {
+                return NotFound(new { message = "NicheReservation không tồn tại" });
+            }
+
+            // Lấy StaffID từ thông tin đăng nhập
+            var staffId = updateStatusDto.StaffID;
+            
+            // Cập nhật trạng thái và StaffID
+            nicheReservation.Status = updateStatusDto.newStatus;
+            nicheReservation.ConfirmedBy = staffId ;
+            _context.Entry(nicheReservation).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!NicheReservationExists(id))
+                {
+                    return NotFound(new { message = "NicheReservation not found" });
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+
         public class CreateNicheReservationDto
         {
             public int CustomerId { get; set; }
             public int NicheId { get; set; }
             public DateOnly? ConfirmationDate { get; set; }
+        }
+
+        public class UpdateNicheReservationStautsDto
+        {
+            public int StaffID { get; set; }
+            public String newStatus { get; set; }
         }
     }
 }
