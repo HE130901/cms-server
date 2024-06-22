@@ -44,7 +44,7 @@ namespace cms_server.Controllers
 
         // PUT: api/Customers/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        /*[HttpPut("{id}")]
         public async Task<IActionResult> PutCustomer(int id, Customer customer)
         {
             if (id != customer.CustomerId)
@@ -71,7 +71,7 @@ namespace cms_server.Controllers
             }
 
             return NoContent();
-        }
+        }*/
 
         /*// POST: api/Customers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -85,6 +85,7 @@ namespace cms_server.Controllers
         }*/
 
         // DELETE: api/Customers/5
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteCustomer(int id)
         {
@@ -138,6 +139,35 @@ namespace cms_server.Controllers
             return CreatedAtAction(nameof(GetCustomerById), new { id = customer.CustomerId }, customer);
         }
 
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateCustomerInfo(int id, [FromBody] UpdateCustomerDTO customerDto)
+        {
+            if (customerDto == null)
+            {
+                return BadRequest(new { message = "Invalid customer data" });
+            }
+
+            var existingCustomer = await _context.Customers.FindAsync(id);
+            if (existingCustomer == null)
+            {
+                return NotFound(new { message = "Customer not found" });
+            }           
+
+            // Update customer properties
+            existingCustomer.Phone = customerDto.Phone;
+            existingCustomer.Address = customerDto.Address;
+
+            if (!string.IsNullOrEmpty(customerDto.Password))
+            {
+                existingCustomer.PasswordHash = BCrypt.Net.BCrypt.HashPassword(customerDto.Password);
+            }
+
+            _context.Customers.Update(existingCustomer);
+            await _context.SaveChangesAsync();
+
+            return Ok(existingCustomer);
+        }
+
         private bool CustomerExists(int id)
         {
             return _context.Customers.Any(e => e.CustomerId == id);
@@ -151,6 +181,13 @@ namespace cms_server.Controllers
             public string? Address { get; set; }
             public string Password { get; set; } = null!;
             public string? CitizenID { get; set; }
+        }
+
+        public class UpdateCustomerDTO
+        {     
+            public string? Phone { get; set; }
+            public string? Address { get; set; }
+            public string Password { get; set; } = null!;
         }
     }
 }
